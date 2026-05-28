@@ -12,22 +12,41 @@
   },
   "pluginOptions": {},
   "attributes": {
+    "blocks": {
+      "type": "dynamiczone",
+      "components": [
+        "shared.quote",
+        "shared.rich-text"
+      ]
+    },
     "title": {
       "type": "string"
     },
-    "description": {
-      "type": "text",
-      "maxLength": 80
-    },
     "slug": {
       "type": "uid",
-      "targetField": "title"
+      "targetField": "title",
+      "required": true
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "isTitleArticle": {
+      "type": "boolean",
+      "default": false
+    },
+    "description": {
+      "type": "text",
+      "maxLength": 180
     },
     "cover": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images", "files", "videos"]
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
     },
     "author": {
       "type": "relation",
@@ -41,9 +60,29 @@
       "target": "api::category.category",
       "inversedBy": "articles"
     },
-    "blocks": {
-      "type": "dynamiczone",
-      "components": ["shared.media", "shared.quote", "shared.rich-text", "shared.slider"]
+    "industry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::industry.industry",
+      "inversedBy": "articles"
+    },
+    "tag": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::tag.tag",
+      "inversedBy": "articles"
+    },
+    "seoTitle": {
+      "type": "string"
+    },
+    "metaDescription": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::topic.topic",
+      "inversedBy": "articles"
     }
   }
 }

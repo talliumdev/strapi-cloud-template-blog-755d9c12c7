@@ -1,9 +1,9 @@
 'use strict';
 
-const COMPANY_LOGO_URL = 'https://essential-festival-ec0ced78b0.media.strapiapp.com/Logo_ca9d96a651.svg';
-const LINKEDIN_URL = 'https://essential-festival-ec0ced78b0.media.strapiapp.com/in_faebae4f27.png';
-const INSTAGRAM_URL = 'https://essential-festival-ec0ced78b0.media.strapiapp.com/i_bfd81deb80.png';
-const FACEBOOK_URL = 'https://essential-festival-ec0ced78b0.media.strapiapp.com/f_1412217fc6.png';
+const COMPANY_LOGO_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/Logo_82a3e176ef.svg';
+const LINKEDIN_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/in_e098d3aaff.png';
+const INSTAGRAM_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/i_64fabcbf05.png';
+const FACEBOOK_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/f_6d10b22cf2.png';
 const LINKEDIN_PAGE_URL = 'https://www.linkedin.com/company/tallium-inc.';
 const INSTAGRAM_PAGE_URL = 'https://www.instagram.com/tallium_inc/';
 const FACEBOOK_PAGE_URL = 'https://www.facebook.com/talliuminc/';

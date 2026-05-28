@@ -531,6 +531,43 @@ export interface ApiAuthorAuthor extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiCandidateApplicationCandidateApplication
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'candidate_applications';
+  info: {
+    description: 'Submissions from Send your CV form';
+    displayName: 'Candidate Application';
+    pluralName: 'candidate-applications';
+    singularName: 'candidate-application';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    about: Schema.Attribute.Text;
+    comment: Schema.Attribute.Text;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email;
+    files: Schema.Attribute.Media<'images' | 'files', true>;
+    fullName: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::candidate-application.candidate-application'
+    > &
+      Schema.Attribute.Private;
+    position: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    submittedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    vacancyId: Schema.Attribute.Integer;
+  };
+}
+
 export interface ApiCategoryCategory extends Struct.CollectionTypeSchema {
   collectionName: 'categories';
   info: {
@@ -592,6 +629,52 @@ export interface ApiGlobalGlobal extends Struct.SingleTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiProjectRequestProjectRequest
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'project_requests';
+  info: {
+    description: 'Submissions from the Get in touch / Request a quote form';
+    displayName: 'Project Request';
+    pluralName: 'project-requests';
+    singularName: 'project-request';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    budget: Schema.Attribute.String;
+    company: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    files: Schema.Attribute.Media<'images' | 'files', true>;
+    fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::project-request.project-request'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text;
+    page: Schema.Attribute.String;
+    phone: Schema.Attribute.String;
+    publishedAt: Schema.Attribute.DateTime;
+    sources: Schema.Attribute.String;
+    sourcesOtherDescription: Schema.Attribute.String;
+    timeline: Schema.Attribute.String;
+    type: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    user_country: Schema.Attribute.String;
+    user_ip: Schema.Attribute.String;
+    utm_campaign: Schema.Attribute.String;
+    utm_medium: Schema.Attribute.String;
+    utm_source: Schema.Attribute.String;
   };
 }
 
@@ -1108,8 +1191,10 @@ declare module '@strapi/strapi' {
       'api::about.about': ApiAboutAbout;
       'api::article.article': ApiArticleArticle;
       'api::author.author': ApiAuthorAuthor;
+      'api::candidate-application.candidate-application': ApiCandidateApplicationCandidateApplication;
       'api::category.category': ApiCategoryCategory;
       'api::global.global': ApiGlobalGlobal;
+      'api::project-request.project-request': ApiProjectRequestProjectRequest;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

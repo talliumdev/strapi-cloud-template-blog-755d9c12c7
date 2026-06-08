@@ -7,7 +7,8 @@ const FACEBOOK_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/
 const LINKEDIN_PAGE_URL = 'https://www.linkedin.com/company/tallium-inc.';
 const INSTAGRAM_PAGE_URL = 'https://www.instagram.com/tallium_inc/';
 const FACEBOOK_PAGE_URL = 'https://www.facebook.com/talliuminc/';
-
+const INTERNAL_NOTIFICATION_EMAIL = 'career@tallium.com, maksym.bondarenko@tallium.com'; // TODO: remove maksym.bondarenko@tallium.com after testing
+const withFallback = (value) => value || 'N/A';
 
 const buildEmailPayload = () => ({
   text: 'We received your CV and will contact you shortly.',
@@ -114,6 +115,93 @@ const buildEmailPayload = () => ({
   `
 });
 
+const buildInternalNotificationPayload = (candidateApplication) => {
+  const fileNames = (candidateApplication?.files || [])
+    .map((file) => file?.name)
+    .filter(Boolean)
+    .join(', ');
+
+  return {
+    text: [
+      'A new candidate application has been submitted.',
+      '',
+      `Name: ${withFallback(candidateApplication.fullName)}`,
+      `Email: ${withFallback(candidateApplication.email)}`,
+      `Position: ${withFallback(candidateApplication.position)}`,
+      `About: ${withFallback(candidateApplication.about)}`,
+      `Vacancy ID: ${withFallback(candidateApplication.vacancyId)}`,
+      `Submitted at: ${withFallback(candidateApplication.submittedAt)}`,
+      fileNames ? `Attached files: ${fileNames}` : null,
+      '',
+      'Please review the application in the Strapi admin panel.'
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    html: `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0;padding:0;background:#F3F3F3;">
+      <tr>
+        <td align="center" style="padding:24px 16px;background:#F3F3F3;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="width:100%;max-width:640px;">
+            <tr>
+              <td align="center" style="padding:0 0 20px 0;">
+                <img src="${COMPANY_LOGO_URL}" alt="Tallium logo" style="display:block;max-width:140px;width:140px;height:auto;border:0;" />
+              </td>
+            </tr>
+
+            <tr>
+              <td style="background:#FFFFFF;border-radius:12px;padding:32px 22px;">
+                <h1 style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:26px;line-height:130%;font-weight:700;color:#161616;">
+                  New Candidate Application
+                </h1>
+
+                <p style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;font-weight:400;color:#161616;">
+                  A new candidate has submitted a CV via the website. Please review the application in the Strapi admin panel.
+                </p>
+
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;width:140px;vertical-align:top;"><strong>Name</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.fullName)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>Email</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.email)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>Position</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.position)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>About</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.about)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>Vacancy ID</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.vacancyId)}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>Submitted</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${withFallback(candidateApplication.submittedAt)}</td>
+                  </tr>
+                  ${
+                    fileNames
+                      ? `<tr>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#6b7280;vertical-align:top;"><strong>Files</strong></td>
+                    <td style="padding:8px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;color:#161616;">${fileNames}</td>
+                  </tr>`
+                      : ''
+                  }
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `
+  };
+};
+
 module.exports = {
   async afterCreate(event) {
     const candidateApplicationId = event?.result?.id;
@@ -126,24 +214,47 @@ module.exports = {
     try {
       const candidateApplication = await strapi.entityService.findOne(
         'api::candidate-application.candidate-application',
-        candidateApplicationId
+        candidateApplicationId,
+        { populate: ['files'] }
       );
 
       const recipientEmail = candidateApplication?.email;
+      const emailService = strapi.plugin('email').service('email');
+      const emailTasks = [];
 
-      if (!recipientEmail) {
-        console.error(`[candidate-application] Cannot send email: missing email for id=${candidateApplicationId}`);
-        return;
+      if (recipientEmail) {
+        emailTasks.push(
+          emailService
+            .send({
+              to: recipientEmail,
+              replyTo: 'info@tallium.com',
+              subject: 'We received your CV',
+              ...buildEmailPayload()
+            })
+            .catch((error) => {
+              console.error('[candidate-application] Failed to send confirmation email:', error);
+            })
+        );
+      } else {
+        console.error(`[candidate-application] Cannot send confirmation email: missing email for id=${candidateApplicationId}`);
       }
 
-      await strapi.plugin('email').service('email').send({
-        to: recipientEmail,
-        replyTo: 'info@tallium.com',
-        subject: 'We received your CV',
-        ...buildEmailPayload()
-      });
+      emailTasks.push(
+        emailService
+          .send({
+            to: INTERNAL_NOTIFICATION_EMAIL,
+            replyTo: candidateApplication?.email || 'info@tallium.com',
+            subject: `New candidate application — ${withFallback(candidateApplication?.fullName)}`,
+            ...buildInternalNotificationPayload(candidateApplication)
+          })
+          .catch((error) => {
+            console.error('[candidate-application] Failed to send internal notification email:', error);
+          })
+      );
+
+      await Promise.all(emailTasks);
     } catch (error) {
-      console.error('[candidate-application] Failed to send confirmation email:', error);
+      console.error('[candidate-application] Failed to process afterCreate emails:', error);
     }
   }
 };

@@ -7,7 +7,7 @@ const FACEBOOK_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/
 const LINKEDIN_PAGE_URL = 'https://www.linkedin.com/company/tallium-inc.';
 const INSTAGRAM_PAGE_URL = 'https://www.instagram.com/tallium_inc/';
 const FACEBOOK_PAGE_URL = 'https://www.facebook.com/talliuminc/';
-const INTERNAL_NOTIFICATION_EMAIL = 'career@tallium.com, maksym.bondarenko@tallium.com'; // TODO: remove maksym.bondarenko@tallium.com after testing
+const INTERNAL_NOTIFICATION_EMAIL = 'career@tallium.com';
 const withFallback = (value) => value || 'N/A';
 
 const buildEmailPayload = () => ({

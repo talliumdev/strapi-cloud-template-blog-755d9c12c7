@@ -7,8 +7,71 @@ const FACEBOOK_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/
 const LINKEDIN_PAGE_URL = 'https://www.linkedin.com/company/tallium-inc.';
 const INSTAGRAM_PAGE_URL = 'https://www.instagram.com/tallium_inc/';
 const FACEBOOK_PAGE_URL = 'https://www.facebook.com/talliuminc/';
-const INTERNAL_NOTIFICATION_EMAIL = 'career@tallium.com';
+const INTERNAL_NOTIFICATION_EMAIL = 'career@tallium.com,maksym.bondarenko@tallium.com'; // ... 'career@tallium.com, maksym.bondarenko@tallium.com'
+const CANDIDATE_APPLICATION_UID = 'api::candidate-application.candidate-application';
+const DEFAULT_ADMIN_BASE_URL = 'https://sincere-positivity-25d680ef23.strapiapp.com';
 const withFallback = (value) => value || 'N/A';
+
+const getAdminBaseUrl = () =>
+  process.env.STRAPI_ADMIN_URL || process.env.PUBLIC_URL || DEFAULT_ADMIN_BASE_URL;
+
+const buildAdminRecordUrl = (documentId) => {
+  if (!documentId) {
+    return null;
+  }
+
+  const baseUrl = getAdminBaseUrl().replace(/\/$/, '');
+  return `${baseUrl}/admin/content-manager/collection-types/${CANDIDATE_APPLICATION_UID}/${documentId}`;
+};
+
+const resolveMediaUrl = (url) => {
+  if (!url) {
+    return null;
+  }
+
+  if (url.startsWith('http')) {
+    return url;
+  }
+
+  const baseUrl = (process.env.STRAPI_PUBLIC_URL || getAdminBaseUrl()).replace(/\/$/, '');
+  return `${baseUrl}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
+const buildEmailAttachments = async (files = []) => {
+  const attachments = [];
+
+  for (const file of files) {
+    if (!file?.url) {
+      continue;
+    }
+
+    const fileUrl = resolveMediaUrl(file.url);
+    const filename =
+      file.ext && file.name && !file.name.endsWith(file.ext)
+        ? `${file.name}${file.ext}`
+        : file.name || 'attachment';
+
+    try {
+      const response = await fetch(fileUrl);
+
+      if (!response.ok) {
+        console.error(`[candidate-application] Failed to fetch file for attachment: ${fileUrl}`);
+        continue;
+      }
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      attachments.push({
+        filename,
+        content: buffer,
+        contentType: file.mime || undefined
+      });
+    } catch (error) {
+      console.error(`[candidate-application] Failed to prepare attachment ${filename}:`, error);
+    }
+  }
+
+  return attachments;
+};
 
 const buildEmailPayload = () => ({
   text: 'We received your CV and will contact you shortly.',
@@ -115,7 +178,7 @@ const buildEmailPayload = () => ({
   `
 });
 
-const buildInternalNotificationPayload = (candidateApplication) => {
+const buildInternalNotificationPayload = (candidateApplication, adminUrl) => {
   const fileNames = (candidateApplication?.files || [])
     .map((file) => file?.name)
     .filter(Boolean)
@@ -133,7 +196,7 @@ const buildInternalNotificationPayload = (candidateApplication) => {
       `Submitted at: ${withFallback(candidateApplication.submittedAt)}`,
       fileNames ? `Attached files: ${fileNames}` : null,
       '',
-      'Please review the application in the Strapi admin panel.'
+      adminUrl ? `View application: ${adminUrl}` : 'Please review the application in the Strapi admin panel.'
     ]
       .filter(Boolean)
       .join('\n'),
@@ -155,8 +218,29 @@ const buildInternalNotificationPayload = (candidateApplication) => {
                 </h1>
 
                 <p style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;font-weight:400;color:#161616;">
-                  A new candidate has submitted a CV via the website. Please review the application in the Strapi admin panel.
+                  A new candidate has submitted a CV via the website.
                 </p>
+
+                ${
+                  adminUrl
+                    ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px 0;">
+                  <tr>
+                    <td align="center">
+                      <a href="${adminUrl}" style="display:inline-block;padding:12px 24px;background:#2E7D32;border-radius:8px;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;font-weight:600;color:#FFFFFF;text-decoration:none;">
+                        View Application
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding-top:12px;font-family:Roboto,sans-serif;font-size:14px;line-height:150%;color:#6b7280;">
+                      <a href="${adminUrl}" style="color:#2E7D32;text-decoration:underline;">${adminUrl}</a>
+                    </td>
+                  </tr>
+                </table>`
+                    : `<p style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;font-weight:400;color:#161616;">
+                  Please review the application in the Strapi admin panel.
+                </p>`
+                }
 
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
                   <tr>
@@ -219,6 +303,8 @@ module.exports = {
       );
 
       const recipientEmail = candidateApplication?.email;
+      const adminUrl = buildAdminRecordUrl(candidateApplication?.documentId);
+      const attachments = await buildEmailAttachments(candidateApplication?.files);
       const emailService = strapi.plugin('email').service('email');
       const emailTasks = [];
 
@@ -245,7 +331,8 @@ module.exports = {
             to: INTERNAL_NOTIFICATION_EMAIL,
             replyTo: candidateApplication?.email || 'info@tallium.com',
             subject: `New candidate application — ${withFallback(candidateApplication?.fullName)}`,
-            ...buildInternalNotificationPayload(candidateApplication)
+            attachments,
+            ...buildInternalNotificationPayload(candidateApplication, adminUrl)
           })
           .catch((error) => {
             console.error('[candidate-application] Failed to send internal notification email:', error);

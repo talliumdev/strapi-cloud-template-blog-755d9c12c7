@@ -1,13 +1,13 @@
 'use strict';
 
-const NOTIFICATION_EMAIL = 'info@tallium.com'; // 'maksym.bondarenko@tallium.com, info@tallium.com'
+const NOTIFICATION_EMAIL = 'info@tallium.com';
 const EMAIL_DELAY_MS = 2 * 60 * 1000;
 const COMPANY_LOGO_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/Logo_82a3e176ef.svg';
 
 const withFallback = (value) => value || 'N/A';
 
 const buildEmailPayload = (projectRequest) => ({
-  text: `A new project request has been submitted.
+  text: `A new project request has been submitted - ${withFallback(projectRequest.fullName)}.
 
 Name: ${withFallback(projectRequest.fullName)}
 Email: ${withFallback(projectRequest.email)}
@@ -31,7 +31,7 @@ Sources (Other): ${withFallback(projectRequest.sourcesOtherDescription)}`,
           <div style="text-align:center;margin-bottom:12px;">
             <img src="${COMPANY_LOGO_URL}" alt="Company logo" style="display:inline-block;max-height:48px;max-width:220px;height:auto;width:auto;" />
           </div>
-          <h2 style="margin:0;font-size:20px;line-height:1.3;">New project request submitted</h2>
+          <h2 style="margin:0;font-size:20px;line-height:1.3;">New project request submitted - ${withFallback(projectRequest.fullName)}</h2>
         </div>
 
         <div style="padding:20px 24px;">
@@ -131,7 +131,7 @@ module.exports = {
         await strapi.plugin('email').service('email').send({
           to: NOTIFICATION_EMAIL, // TODO: change to the actual email
           replyTo: NOTIFICATION_EMAIL,
-          subject: 'New project request submitted',
+          subject: `New project request submitted - ${withFallback(freshProjectRequest?.fullName)}`,
           ...emailPayload,
         });
       } catch (err) {

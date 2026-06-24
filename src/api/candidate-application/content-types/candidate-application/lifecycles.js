@@ -214,7 +214,7 @@ const buildInternalNotificationPayload = (candidateApplication, adminUrl) => {
             <tr>
               <td style="background:#FFFFFF;border-radius:12px;padding:32px 22px;">
                 <h1 style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:26px;line-height:130%;font-weight:700;color:#161616;">
-                  New Candidate Application
+                  New Candidate Application - ${withFallback(candidateApplication.fullName)}
                 </h1>
 
                 <p style="margin:0 0 20px 0;font-family:Roboto,sans-serif;font-size:16px;line-height:150%;font-weight:400;color:#161616;">

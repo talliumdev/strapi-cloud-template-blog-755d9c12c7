@@ -1,7 +1,7 @@
 'use strict';
 
 const NOTIFICATION_EMAIL = 'info@tallium.com';
-const EMAIL_DELAY_MS = 2 * 60 * 1000;
+const EMAIL_DELAY_MS = 4 * 60 * 1000;
 const COMPANY_LOGO_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/Logo_82a3e176ef.svg';
 
 const withFallback = (value) => value || 'N/A';

@@ -1,3 +1,5 @@
+import { Mail, User } from '@strapi/icons';
+
 const config = {
   locales: [],
 };
@@ -5,7 +7,7 @@ const config = {
 const bootstrap = (app) => {
   app.addMenuLink({
     to: '/content-manager/collection-types/api::project-request.project-request',
-    icon: 'envelop',
+    icon: Mail,
     intlLabel: {
       id: 'project-request.menu.label',
       defaultMessage: 'Project Requests',
@@ -20,7 +22,7 @@ const bootstrap = (app) => {
 
   app.addMenuLink({
     to: '/content-manager/collection-types/api::candidate-application.candidate-application',
-    icon: 'user',
+    icon: User,
     intlLabel: {
       id: 'candidate-application.menu.label',
       defaultMessage: 'Candidate Applications',

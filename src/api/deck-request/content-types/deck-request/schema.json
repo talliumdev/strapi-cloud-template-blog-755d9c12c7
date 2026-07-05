@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deck_requests",
+  "info": {
+    "singularName": "deck-request",
+    "pluralName": "deck-requests",
+    "displayName": "Deck Request",
+    "description": "Submissions from the Insights unlock-deck (ebook download) form"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "fullName": {
+      "type": "string",
+      "required": true
+    },
+    "company": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "phone": {
+      "type": "string"
+    },
+    "lookingFor": {
+      "type": "string"
+    },
+    "lookingForOther": {
+      "type": "string"
+    },
+    "deckType": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "page": {
+      "type": "string"
+    },
+    "utm_campaign": {
+      "type": "string"
+    },
+    "utm_medium": {
+      "type": "string"
+    },
+    "utm_source": {
+      "type": "string"
+    },
+    "user_country": {
+      "type": "string"
+    },
+    "user_ip": {
+      "type": "string"
+    }
+  }
+}

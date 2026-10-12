@@ -4,6 +4,10 @@ const NOTIFICATION_EMAIL = 'info@tallium.com';
 const EMAIL_DELAY_MS = 4 * 60 * 1000;
 const COMPANY_LOGO_URL = 'https://sincere-positivity-25d680ef23.media.strapiapp.com/Logo_82a3e176ef.svg';
 
+const LAPIS_SERVER_EVENTS_URL = 'https://api.trylapis.com/api/v1/pixel/server-events';
+const LAPIS_REQUEST_TIMEOUT_MS = 5000;
+const LAPIS_MAX_ATTEMPTS = 2;
+
 const withFallback = (value) => value || 'N/A';
 
 const buildEmailPayload = (projectRequest) => ({
@@ -19,6 +23,8 @@ Page: ${withFallback(projectRequest.page)}
 UTM Campaign: ${withFallback(projectRequest.utm_campaign)}
 UTM Medium: ${withFallback(projectRequest.utm_medium)}
 UTM Source: ${withFallback(projectRequest.utm_source)}
+UTM Content: ${withFallback(projectRequest.utm_content)}
+UTM Term: ${withFallback(projectRequest.utm_term)}
 User Country: ${withFallback(projectRequest.user_country)}
 User IP: ${withFallback(projectRequest.user_ip)}
 Timeline: ${withFallback(projectRequest.timeline)}
@@ -73,6 +79,14 @@ Sources (Other): ${withFallback(projectRequest.sourcesOtherDescription)}`,
               <td style="padding:8px 0;color:#111827;">${withFallback(projectRequest.utm_source)}</td>
             </tr>
             <tr>
+              <td style="padding:8px 0;color:#6b7280;vertical-align:top;"><strong>UTM Content</strong></td>
+              <td style="padding:8px 0;color:#111827;">${withFallback(projectRequest.utm_content)}</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:#6b7280;vertical-align:top;"><strong>UTM Term</strong></td>
+              <td style="padding:8px 0;color:#111827;">${withFallback(projectRequest.utm_term)}</td>
+            </tr>
+            <tr>
               <td style="padding:8px 0;color:#6b7280;vertical-align:top;"><strong>User Country</strong></td>
               <td style="padding:8px 0;color:#111827;">${withFallback(projectRequest.user_country)}</td>
             </tr>
@@ -104,6 +118,48 @@ Sources (Other): ${withFallback(projectRequest.sourcesOtherDescription)}`,
   `,
 });
 
+const sendLapisLead = async (projectRequest) => {
+  const body = JSON.stringify({
+    events: [
+      {
+        id: `lead_created:${projectRequest.id}`,
+        type: 'lead_created',
+        timestamp_ms: new Date(projectRequest.createdAt).getTime(),
+        action_source: 'web',
+        source_url:
+          projectRequest.page && projectRequest.page.startsWith('/')
+            ? `https://tallium.com${projectRequest.page}`
+            : 'https://tallium.com/en/contact-us',
+        lapis_click_id: projectRequest.lapis_click_id,
+        data: { type: 'customer_action' },
+      },
+    ],
+  });
+
+  for (let attempt = 1; attempt <= LAPIS_MAX_ATTEMPTS; attempt++) {
+    const response = await fetch(LAPIS_SERVER_EVENTS_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.LAPIS_SERVER_EVENT_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body,
+      signal: AbortSignal.timeout(LAPIS_REQUEST_TIMEOUT_MS),
+    });
+
+    if (response.status < 500) {
+      if (response.status === 401 || response.status === 422) {
+        console.error(
+          `[project-request] Lapis rejected lead id=${projectRequest.id}: ${response.status} ${await response.text()}`
+        );
+      }
+      return;
+    }
+  }
+
+  console.error(`[project-request] Lapis lead id=${projectRequest.id} not delivered after ${LAPIS_MAX_ATTEMPTS} attempts`);
+};
+
 module.exports = {
   async afterCreate(event) {
     const { result } = event;
@@ -112,6 +168,13 @@ module.exports = {
     if (!projectRequestId) {
       console.error('[project-request] Cannot schedule email: missing projectRequestId');
       return;
+    }
+
+    if (result.lapis_click_id && process.env.LAPIS_SERVER_EVENT_KEY) {
+      // Not awaited: the form response must not wait for (or fail because of) Lapis
+      sendLapisLead(result).catch((err) => {
+        console.error(`[project-request] Failed to send lead id=${projectRequestId} to Lapis:`, err);
+      });
     }
 
     setTimeout(async () => {

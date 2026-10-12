@@ -792,6 +792,7 @@ export interface ApiProjectRequestProjectRequest
     email: Schema.Attribute.Email & Schema.Attribute.Required;
     files: Schema.Attribute.Media<'images' | 'files', true>;
     fullName: Schema.Attribute.String & Schema.Attribute.Required;
+    lapis_click_id: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -812,8 +813,10 @@ export interface ApiProjectRequestProjectRequest
     user_country: Schema.Attribute.String;
     user_ip: Schema.Attribute.String;
     utm_campaign: Schema.Attribute.String;
+    utm_content: Schema.Attribute.String;
     utm_medium: Schema.Attribute.String;
     utm_source: Schema.Attribute.String;
+    utm_term: Schema.Attribute.String;
   };
 }
 

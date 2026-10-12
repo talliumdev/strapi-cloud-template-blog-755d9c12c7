@@ -53,6 +53,15 @@
     "utm_source": {
       "type": "string"
     },
+    "utm_content": {
+      "type": "string"
+    },
+    "utm_term": {
+      "type": "string"
+    },
+    "lapis_click_id": {
+      "type": "string"
+    },
     "user_country": {
       "type": "string"
     },
